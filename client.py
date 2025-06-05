@@ -4,44 +4,23 @@ from typing import Dict, Any
 
 def call_review_agent(plan: str) -> Dict[str, Any]:
     """Вызов агента проверки плана (Pydantic)"""
-    try:
-        response = requests.post(
-            "http://localhost:8000/review",
-            json={"plan": plan}
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка при вызове агента проверки: {str(e)}")
-        if hasattr(e.response, 'text'):
-            print(f"Ответ сервера: {e.response.text}")
-        return {
-            "analysis": "Не удалось получить анализ плана",
-            "recommendations": ["Сервис временно недоступен"]
-        }
+    response = requests.post(
+        "http://localhost:8000/review",
+        json={"plan": plan}
+    )
+    return response.json()
 
 def call_optimization_agent(plan: str, budget: float, days: int) -> Dict[str, Any]:
     """Вызов агента оптимизации (LangChain)"""
-    try:
-        response = requests.post(
-            "http://localhost:8001/optimize",
-            json={
-                "plan": plan,
-                "budget": budget,
-                "days": days
-            }
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка при вызове агента оптимизации: {str(e)}")
-        if hasattr(e.response, 'text'):
-            print(f"Ответ сервера: {e.response.text}")
-        return {
-            "optimized_plan": "Не удалось оптимизировать план",
-            "estimated_cost": budget,
-            "daily_breakdown": [f"День {i+1}: Информация недоступна" for i in range(days)]
+    response = requests.post(
+        "http://localhost:8001/optimize",
+        json={
+            "plan": plan,
+            "budget": budget,
+            "days": days
         }
+    )
+    return response.json()
 
 def main():
     # Пример плана путешествия

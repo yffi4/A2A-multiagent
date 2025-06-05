@@ -55,20 +55,20 @@ prompt = ChatPromptTemplate.from_template(template)
 @app.post("/optimize")
 async def optimize_plan(input_data: OptimizationInput):
     try:
-        # Форматируем промпт
+        
         messages = prompt.format_messages(
             budget=input_data.budget,
             days=input_data.days,
             plan=input_data.plan
         )
         
-        # Получаем ответ от модели
+    
         response = llm.invoke(messages)
         
         try:
-            # Извлекаем JSON из ответа
+            
             content = response.content
-            # Удаляем все, что не является JSON
+            
             start_idx = content.find('{')
             end_idx = content.rfind('}') + 1
             if start_idx != -1 and end_idx != -1:
@@ -76,23 +76,23 @@ async def optimize_plan(input_data: OptimizationInput):
             else:
                 raise ValueError("No JSON found in response")
 
-            # Парсим JSON ответ
+            
             result = json.loads(json_str)
             
-            # Проверяем наличие всех необходимых полей
+            
             if not all(key in result for key in ["optimized_plan", "estimated_cost", "daily_breakdown"]):
                 raise ValueError("Missing required fields in response")
             
-            # Проверяем типы данных
+            
             if not isinstance(result["estimated_cost"], (int, float)):
                 result["estimated_cost"] = float(result["estimated_cost"])
             
-            # Проверяем количество дней
+    
             if len(result["daily_breakdown"]) != input_data.days:
                 result["daily_breakdown"] = result["daily_breakdown"][:input_data.days] if len(result["daily_breakdown"]) > input_data.days else \
                     result["daily_breakdown"] + [f"День {i+1}: Требуется планирование" for i in range(len(result["daily_breakdown"]), input_data.days)]
             
-            # Создаем и валидируем объект OptimizedPlan
+            
             optimized_plan = OptimizedPlan(
                 optimized_plan=result["optimized_plan"],
                 estimated_cost=result["estimated_cost"],
@@ -104,7 +104,7 @@ async def optimize_plan(input_data: OptimizationInput):
         except (json.JSONDecodeError, ValueError) as e:
             print(f"Error parsing response: {str(e)}")
             print(f"Raw response: {response.content}")
-            # Если не удалось распарсить JSON или данные некорректны
+        
             return OptimizedPlan(
                 optimized_plan="План не удалось оптимизировать",
                 estimated_cost=float(input_data.budget),

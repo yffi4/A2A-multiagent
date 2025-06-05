@@ -20,7 +20,6 @@ class ReviewResponse(BaseModel):
 
 @app.post("/review", response_model=ReviewResponse)
 async def review_plan(plan_input: PlanInput):
-    # OpenAI агент анализирует план путешествия
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -34,7 +33,6 @@ async def review_plan(plan_input: PlanInput):
     
     content = response.choices[0].message.content
     
-    # Разделяем ответ на анализ и рекомендации
     parts = content.split("\n\n")
     analysis = parts[0]
     recommendations = [r.strip("- ") for r in parts[1].split("\n") if r.strip()]
